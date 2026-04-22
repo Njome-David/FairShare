@@ -101,8 +101,8 @@ export function AddExpenseFab({ groupId, members }: AddExpenseFabProps) {
 
   return (
     <>
-      {/* FAB */}
-      <div className="fixed bottom-20 left-0 right-0 z-40 flex justify-center pointer-events-none">
+      {/* FAB flottant */}
+      <div className="fixed bottom-6 left-0 right-0 z-40 flex justify-center pointer-events-none">
         <div className="relative pointer-events-auto">
           {!open && (
             <motion.div
@@ -122,8 +122,9 @@ export function AddExpenseFab({ groupId, members }: AddExpenseFabProps) {
         </div>
       </div>
 
+      {/* Bottom Sheet pour nouvelle dépense */}
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetContent side="bottom" className="h-[85vh] rounded-t-3xl">
+        <SheetContent side="bottom" className="h-auto max-h-[85vh] rounded-t-3xl px-5 pb-8 pt-6">
           <SheetHeader>
             <SheetTitle className="font-display text-2xl">Nouvelle dépense</SheetTitle>
           </SheetHeader>
@@ -135,6 +136,7 @@ export function AddExpenseFab({ groupId, members }: AddExpenseFabProps) {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Ex: Dîner"
+                className="h-12"
                 required
               />
             </div>
@@ -147,13 +149,14 @@ export function AddExpenseFab({ groupId, members }: AddExpenseFabProps) {
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder="0.00"
+                className="h-12"
                 required
               />
             </div>
             <div>
               <Label>Payé par</Label>
               <Select value={payerId} onValueChange={setPayerId}>
-                <SelectTrigger>
+                <SelectTrigger className="h-12">
                   <SelectValue placeholder="Sélectionner le payeur" />
                 </SelectTrigger>
                 <SelectContent>
@@ -167,22 +170,26 @@ export function AddExpenseFab({ groupId, members }: AddExpenseFabProps) {
             </div>
             <div>
               <Label>Participants</Label>
-              <div className="space-y-2 mt-2 max-h-48 overflow-y-auto">
+              <div className="space-y-2 mt-2 max-h-56 overflow-y-auto pr-1">
                 {members.map((m) => (
-                  <div key={m.id} className="flex items-center space-x-2">
+                  <div key={m.id} className="flex items-center space-x-3 py-1">
                     <Checkbox
                       id={`participant-${m.id}`}
                       checked={selectedParticipants.includes(m.id)}
                       onCheckedChange={() => toggleParticipant(m.id)}
                     />
-                    <label htmlFor={`participant-${m.id}`} className="text-sm">
+                    <label htmlFor={`participant-${m.id}`} className="text-sm font-medium cursor-pointer">
                       {m.name}
                     </label>
                   </div>
                 ))}
               </div>
             </div>
-            <Button type="submit" className="w-full" disabled={createExpense.isPending}>
+            <Button
+              type="submit"
+              className="w-full h-12 text-base font-semibold"
+              disabled={createExpense.isPending}
+            >
               {createExpense.isPending ? "Ajout..." : "Ajouter la dépense"}
             </Button>
           </form>

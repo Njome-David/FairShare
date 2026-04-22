@@ -9,7 +9,6 @@ import { BalanceHero } from "./balance-hero"
 import { SettlementList } from "./settlement-list"
 import { RecentExpenses } from "./recent-expenses"
 import { AddExpenseFab } from "./add-expense-fab"
-import { BottomNav } from "./bottom-nav"
 import { useUser } from "@/contexts/user-context"
 
 interface GroupDashboardProps {
@@ -111,8 +110,6 @@ export function GroupDashboard({ groupId, onBack }: GroupDashboardProps) {
 
           <BalanceHero
             netBalance={netBalance}
-            totalOwedToYou={totalOwedToYou}
-            totalYouOwe={totalYouOwe}
           />
 
           <SettlementList
@@ -127,7 +124,6 @@ export function GroupDashboard({ groupId, onBack }: GroupDashboardProps) {
         </div>
 
         <AddExpenseFab groupId={groupId} members={members} />
-        <BottomNav />
       </div>
     </main>
   )

@@ -1,4 +1,3 @@
-// components/fairshare/groups-list.tsx
 "use client"
 
 import { useState } from "react"
@@ -32,36 +31,45 @@ export function GroupsList({ onSelectGroup }: GroupsListProps) {
   const [newGroupName, setNewGroupName] = useState("")
   const [newGroupEmoji, setNewGroupEmoji] = useState("🎉")
   const [joinCode, setJoinCode] = useState("")
+  const [joinError, setJoinError] = useState("")
+  const [createError, setCreateError] = useState("")
 
   const emojis = ["🎉", "✈️", "🏠", "🍕", "🎂", "🏖️", "🎿", "🎮", "🍻", "🎵"]
 
   // Récupération des groupes
-  const { data: groups = [], isLoading } = useQuery({
+  const { data: groups = [], isLoading } = useQuery<Group[]>({
     queryKey: ["groups", user?.id],
     queryFn: async () => {
       const res = await fetch(`/api/users/${user!.id}/groups`)
       if (!res.ok) throw new Error("Erreur chargement groupes")
-      return res.json() as Promise<Group[]>
+      return res.json()
     },
     enabled: !!user,
   })
 
   // Mutation pour créer un groupe
   const createGroupMutation = useMutation({
-    mutationFn: async ({ name, emoji }: { name: string; emoji: string }) => {
+    mutationFn: async ({ name }: { name: string }) => {
       const res = await fetch("/api/groups", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, userId: user!.id }),
       })
-      if (!res.ok) throw new Error("Erreur création groupe")
+      if (!res.ok) {
+        const error = await res.json()
+        throw new Error(error.error || "Erreur création groupe")
+      }
       return res.json()
     },
     onSuccess: (newGroup) => {
       queryClient.invalidateQueries({ queryKey: ["groups"] })
       setShowCreateModal(false)
       setNewGroupName("")
+      setCreateError("")
       onSelectGroup(newGroup.id)
+    },
+    onError: (error: Error) => {
+      setCreateError(error.message)
     },
   })
 
@@ -73,29 +81,40 @@ export function GroupsList({ onSelectGroup }: GroupsListProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ inviteCode: code, userId: user!.id }),
       })
-      if (!res.ok) throw new Error("Code invalide")
+      if (!res.ok) {
+        const error = await res.json()
+        throw new Error(error.error || "Code invalide")
+      }
       return res.json()
     },
     onSuccess: (joinedGroup) => {
       queryClient.invalidateQueries({ queryKey: ["groups"] })
       setShowJoinModal(false)
       setJoinCode("")
+      setJoinError("")
       onSelectGroup(joinedGroup.id)
+    },
+    onError: (error: Error) => {
+      setJoinError(error.message)
     },
   })
 
   const handleCreateGroup = (e: React.FormEvent) => {
     e.preventDefault()
-    if (newGroupName.trim().length >= 2) {
-      createGroupMutation.mutate({ name: newGroupName.trim(), emoji: newGroupEmoji })
+    if (newGroupName.trim().length < 2) {
+      setCreateError("Le nom doit contenir au moins 2 caractères")
+      return
     }
+    createGroupMutation.mutate({ name: newGroupName.trim() })
   }
 
   const handleJoinGroup = (e: React.FormEvent) => {
     e.preventDefault()
-    if (joinCode.trim().length >= 4) {
-      joinGroupMutation.mutate(joinCode.trim().toUpperCase())
+    if (joinCode.trim().length < 4) {
+      setJoinError("Code invalide")
+      return
     }
+    joinGroupMutation.mutate(joinCode.trim().toUpperCase())
   }
 
   if (isLoading) {
@@ -108,6 +127,7 @@ export function GroupsList({ onSelectGroup }: GroupsListProps) {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Dégradé ambiant */}
       <div
         className="pointer-events-none fixed inset-0 opacity-40"
         style={{
@@ -147,10 +167,12 @@ export function GroupsList({ onSelectGroup }: GroupsListProps) {
           </div>
         </header>
 
+        {/* Titre */}
         <div className="px-5 pt-6 pb-4">
           <h1 className="font-display text-2xl font-bold text-foreground">Mes Groupes</h1>
         </div>
 
+        {/* Liste des groupes */}
         <div className="px-5 space-y-3">
           {groups.length === 0 ? (
             <motion.div
@@ -179,8 +201,7 @@ export function GroupsList({ onSelectGroup }: GroupsListProps) {
                 className="w-full bg-white rounded-2xl border border-black/5 p-4 flex items-center gap-4 hover:border-primary/20 hover:shadow-md hover:shadow-primary/5 transition-all text-left group"
               >
                 <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-2xl shrink-0">
-                  {/* Emoji stocké nulle part, on utilise un fallback */}
-                  {"👥"}
+                  👥
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="font-display font-semibold text-foreground truncate">
@@ -203,6 +224,7 @@ export function GroupsList({ onSelectGroup }: GroupsListProps) {
           )}
         </div>
 
+        {/* Boutons d'action */}
         <div className="px-5 pt-6 space-y-3">
           <Button
             onClick={() => setShowCreateModal(true)}
@@ -222,8 +244,138 @@ export function GroupsList({ onSelectGroup }: GroupsListProps) {
         </div>
       </div>
 
-      {/* Modales inchangées, mais avec gestion d'erreur/loading */}
-      {/* ... (code des modales identique, avec ajout d'états de chargement si souhaité) ... */}
+      {/* Modal Créer un groupe */}
+      <AnimatePresence>
+        {showCreateModal && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowCreateModal(false)}
+              className="fixed inset-0 bg-black/40 z-50"
+            />
+            <motion.div
+              initial={{ opacity: 0, y: 100 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 100 }}
+              className="fixed inset-x-0 bottom-0 z-50 bg-background rounded-t-3xl p-6 pb-10 max-w-md mx-auto"
+            >
+              <div className="w-10 h-1 bg-black/10 rounded-full mx-auto mb-6" />
+              <h2 className="font-display text-xl font-bold text-foreground mb-6">
+                Nouveau groupe
+              </h2>
+              <form onSubmit={handleCreateGroup} className="space-y-5">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground/70">
+                    Choisir un emoji
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {emojis.map((emoji) => (
+                      <button
+                        key={emoji}
+                        type="button"
+                        onClick={() => setNewGroupEmoji(emoji)}
+                        className={`w-12 h-12 rounded-xl text-2xl flex items-center justify-center transition-all ${
+                          newGroupEmoji === emoji
+                            ? "bg-primary/15 ring-2 ring-primary"
+                            : "bg-black/5 hover:bg-black/10"
+                        }`}
+                      >
+                        {emoji}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground/70">
+                    Nom du groupe
+                  </label>
+                  <Input
+                    type="text"
+                    placeholder="Ex: Weekend Lisbonne"
+                    value={newGroupName}
+                    onChange={(e) => {
+                      setNewGroupName(e.target.value)
+                      setCreateError("")
+                    }}
+                    className="h-14 text-base bg-white border-black/10 rounded-xl"
+                    autoFocus
+                  />
+                  {createError && (
+                    <p className="text-sm text-destructive">{createError}</p>
+                  )}
+                </div>
+                <Button
+                  type="submit"
+                  disabled={createGroupMutation.isPending}
+                  className="w-full h-14 text-base font-semibold rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground"
+                >
+                  {createGroupMutation.isPending ? "Création..." : "Créer le groupe"}
+                </Button>
+              </form>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Modal Rejoindre un groupe */}
+      <AnimatePresence>
+        {showJoinModal && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowJoinModal(false)}
+              className="fixed inset-0 bg-black/40 z-50"
+            />
+            <motion.div
+              initial={{ opacity: 0, y: 100 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 100 }}
+              className="fixed inset-x-0 bottom-0 z-50 bg-background rounded-t-3xl p-6 pb-10 max-w-md mx-auto"
+            >
+              <div className="w-10 h-1 bg-black/10 rounded-full mx-auto mb-6" />
+              <h2 className="font-display text-xl font-bold text-foreground mb-6">
+                Rejoindre un groupe
+              </h2>
+              <form onSubmit={handleJoinGroup} className="space-y-5">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground/70">
+                    Code d'invitation
+                  </label>
+                  <div className="relative">
+                    <Hash className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-foreground/40" />
+                    <Input
+                      type="text"
+                      placeholder="XX-XXXX"
+                      value={joinCode}
+                      onChange={(e) => {
+                        setJoinCode(e.target.value.toUpperCase())
+                        setJoinError("")
+                      }}
+                      className="h-14 text-base text-center font-mono tracking-widest bg-white border-black/10 rounded-xl pl-10"
+                      autoFocus
+                      maxLength={7}
+                    />
+                  </div>
+                  {joinError && (
+                    <p className="text-sm text-destructive">{joinError}</p>
+                  )}
+                </div>
+                <Button
+                  type="submit"
+                  disabled={joinGroupMutation.isPending}
+                  className="w-full h-14 text-base font-semibold rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground"
+                >
+                  {joinGroupMutation.isPending ? "Recherche..." : "Rejoindre"}
+                </Button>
+              </form>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

@@ -2,11 +2,10 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Home, Users, Activity, User } from "lucide-react"
+import { Home, Activity, User } from "lucide-react"
 
 const tabs = [
   { id: "home", icon: Home, label: "Accueil" },
-  { id: "groups", icon: Users, label: "Groupes" },
   { id: "activity", icon: Activity, label: "Activité" },
   { id: "profile", icon: User, label: "Profil" },
 ] as const
@@ -30,17 +29,8 @@ export function BottomNav({ active, onTabChange }: BottomNavProps) {
       />
 
       <div className="relative mx-4 mb-3 h-16 rounded-full border border-border bg-white/90 backdrop-blur-xl shadow-[0_-2px_24px_rgba(0,0,0,0.08)]">
-        <div className="relative grid grid-cols-5 h-full items-center">
-          {tabs.slice(0, 2).map((tab) => (
-            <TabButton
-              key={tab.id}
-              tab={tab}
-              isActive={active === tab.id}
-              onClick={() => onTabChange(tab.id)}
-            />
-          ))}
-          <div aria-hidden />
-          {tabs.slice(2).map((tab) => (
+        <div className="grid grid-cols-3 h-full items-center">
+          {tabs.map((tab) => (
             <TabButton
               key={tab.id}
               tab={tab}
@@ -54,7 +44,15 @@ export function BottomNav({ active, onTabChange }: BottomNavProps) {
   )
 }
 
-function TabButton({ tab, isActive, onClick }: any) {
+function TabButton({
+  tab,
+  isActive,
+  onClick,
+}: {
+  tab: { id: string; icon: typeof Home; label: string }
+  isActive: boolean
+  onClick: () => void
+}) {
   const Icon = tab.icon
   return (
     <button
