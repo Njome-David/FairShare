@@ -20,8 +20,7 @@ interface SettlementListProps {
 
 export function SettlementList({
   settlements,
-  currency = "FCFA",
-  originalTransactionCount = 12,
+  currency = "FCFA"
 }: SettlementListProps) {
   const [settled, setSettled] = useState<Set<string>>(new Set())
 
@@ -50,7 +49,6 @@ export function SettlementList({
           </h2>
         </div>
         <span className="text-xs text-foreground/60 font-medium">
-          au lieu de {originalTransactionCount}
         </span>
       </div>
 
@@ -198,7 +196,7 @@ export function SettlementList({
             <p className="text-2xl mb-1">🎉</p>
             <p className="font-display font-semibold text-primary">Tout est réglé !</p>
             <p className="text-xs text-foreground/70 mt-1">
-              Le groupe est a zero. Prochaine activité ?
+              Le groupe est a zéro. Prochaine activité ?
             </p>
           </motion.div>
         )}

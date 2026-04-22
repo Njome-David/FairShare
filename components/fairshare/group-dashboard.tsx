@@ -50,12 +50,6 @@ export function GroupDashboard({ groupId, onBack }: GroupDashboardProps) {
   // Calculer le solde net de l'utilisateur courant
   const currentUserBalance = balances.netBalances.find((b: any) => b.userId === user?.id)
   const netBalance = currentUserBalance?.amount || 0
-  const totalOwedToYou = balances.netBalances
-    .filter((b: any) => b.amount > 0)
-    .reduce((sum: number, b: any) => sum + b.amount, 0)
-  const totalYouOwe = balances.netBalances
-    .filter((b: any) => b.amount < 0)
-    .reduce((sum: number, b: any) => sum + Math.abs(b.amount), 0)
 
   // Formater les transactions suggérées pour SettlementList
   const settlements = balances.suggestedTransactions.map((t: any) => {

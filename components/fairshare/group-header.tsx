@@ -46,7 +46,7 @@ export function GroupHeader({
       <div className="flex items-start justify-between gap-4 mb-5">
         <div className="min-w-0 flex-1">
           <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-primary mb-2">
-            Total dépensé · {totalSpent?.toFixed(2)}€
+            Total dépensé · {Math.round(totalSpent ?? 0).toLocaleString()} FCFA
           </p>
           <h1 className="font-display text-[34px] leading-[1.02] font-bold text-balance tracking-tight text-foreground">
             {groupName}

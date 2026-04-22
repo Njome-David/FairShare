@@ -44,6 +44,7 @@ export function AddExpenseFab({ groupId, members }: AddExpenseFabProps) {
   const [amount, setAmount] = useState("")
   const [payerId, setPayerId] = useState(user?.id || "")
   const [selectedParticipants, setSelectedParticipants] = useState<string[]>([])
+  const [amountError, setAmountError] = useState("")
 
   const createExpense = useMutation({
     mutationFn: async (data: any) => {
@@ -68,15 +69,38 @@ export function AddExpenseFab({ groupId, members }: AddExpenseFabProps) {
     setAmount("")
     setPayerId(user?.id || "")
     setSelectedParticipants([])
+    setAmountError("")
   }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    const numAmount = parseFloat(amount)
-    if (isNaN(numAmount) || numAmount <= 0) return
-    if (selectedParticipants.length === 0) return
 
-    const sharePerPerson = numAmount / selectedParticipants.length
+    // Validation du montant
+    const rawAmount = parseFloat(amount)
+    if (isNaN(rawAmount) || rawAmount <= 0) {
+      setAmountError("Le montant doit être supérieur à 0")
+      return
+    }
+
+    // Vérification multiple de 25
+    if (rawAmount % 25 !== 0) {
+      // Option 1 : Arrondir automatiquement et continuer
+      const rounded = Math.round(rawAmount / 25) * 25
+      setAmount(rounded.toString())
+      setAmountError("")
+      // On peut aussi demander confirmation à l'utilisateur, mais pour simplifier on arrondit
+      // Pour l'instant on continue avec la valeur arrondie
+      // (On pourrait aussi juste afficher l'erreur et ne pas soumettre)
+      // Je choisis d'arrondir automatiquement pour fluidifier l'expérience
+    }
+
+    const finalAmount = Math.round(parseFloat(amount) / 25) * 25
+
+    if (selectedParticipants.length === 0) {
+      return
+    }
+
+    const sharePerPerson = finalAmount / selectedParticipants.length
     const splits = selectedParticipants.map(userId => ({
       userId,
       share: sharePerPerson,
@@ -84,7 +108,7 @@ export function AddExpenseFab({ groupId, members }: AddExpenseFabProps) {
 
     createExpense.mutate({
       description,
-      amount: numAmount,
+      amount: finalAmount,
       payerId,
       groupId,
       splits,
@@ -99,9 +123,20 @@ export function AddExpenseFab({ groupId, members }: AddExpenseFabProps) {
     )
   }
 
+  // Validation en temps réel pour afficher un warning (optionnel)
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    setAmount(value)
+    const num = parseFloat(value)
+    if (!isNaN(num) && num > 0 && num % 25 !== 0) {
+      setAmountError("Le montant sera arrondi au multiple de 25 FCFA le plus proche")
+    } else {
+      setAmountError("")
+    }
+  }
+
   return (
     <>
-      {/* FAB flottant */}
       <div className="fixed bottom-6 left-0 right-0 z-40 flex justify-center pointer-events-none">
         <div className="relative pointer-events-auto">
           {!open && (
@@ -122,7 +157,6 @@ export function AddExpenseFab({ groupId, members }: AddExpenseFabProps) {
         </div>
       </div>
 
-      {/* Bottom Sheet pour nouvelle dépense */}
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent
           side="bottom"
@@ -150,15 +184,14 @@ export function AddExpenseFab({ groupId, members }: AddExpenseFabProps) {
                 type="number"
                 step="25"
                 value={amount}
-                onChange={(e) => {
-                  const raw = parseFloat(e.target.value) || 0;
-                  const rounded = Math.round(raw / 25) * 25;
-                  setAmount(rounded.toString());
-                }}
+                onChange={handleAmountChange}
                 placeholder="0"
                 className="h-12"
                 required
               />
+              {amountError && (
+                <p className="text-xs text-amber-600 mt-1">{amountError}</p>
+              )}
             </div>
             <div>
               <Label>Payé par</Label>
