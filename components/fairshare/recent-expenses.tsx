@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { motion } from "framer-motion"
 import { Receipt, Trash2 } from "lucide-react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
@@ -23,8 +24,11 @@ interface RecentExpensesProps {
   groupId: string
 }
 
+const INITIAL_DISPLAY_COUNT = 5 // ← Nombre de dépenses affichées par défaut
+
 export function RecentExpenses({ expenses, currency = "FCFA", groupId }: RecentExpensesProps) {
   const queryClient = useQueryClient()
+  const [showAll, setShowAll] = useState(false)
 
   const deleteExpense = useMutation({
     mutationFn: async (expenseId: string) => {
@@ -37,7 +41,12 @@ export function RecentExpenses({ expenses, currency = "FCFA", groupId }: RecentE
     },
   })
 
-  const grouped = expenses.reduce<Record<string, Expense[]>>((acc, exp) => {
+  // Limiter les dépenses affichées si showAll est false
+  const displayedExpenses = showAll ? expenses : expenses.slice(0, INITIAL_DISPLAY_COUNT)
+  const hasMore = expenses.length > INITIAL_DISPLAY_COUNT
+
+  // Grouper par date (sur les dépenses affichées)
+  const grouped = displayedExpenses.reduce<Record<string, Expense[]>>((acc, exp) => {
     if (!acc[exp.date]) acc[exp.date] = []
     acc[exp.date].push(exp)
     return acc
@@ -54,9 +63,14 @@ export function RecentExpenses({ expenses, currency = "FCFA", groupId }: RecentE
             Dépenses récentes
           </h2>
         </div>
-        <button className="text-xs font-semibold text-primary hover:underline underline-offset-4">
-          Voir tout
-        </button>
+        {hasMore && (
+          <button
+            onClick={() => setShowAll(!showAll)}
+            className="text-xs font-semibold text-primary hover:underline underline-offset-4"
+          >
+            {showAll ? "Voir moins" : "Voir tout"}
+          </button>
+        )}
       </div>
 
       <div className="flex flex-col gap-4">
@@ -95,7 +109,7 @@ export function RecentExpenses({ expenses, currency = "FCFA", groupId }: RecentE
                   </div>
                   <div className="text-right shrink-0">
                     <p className="font-display font-semibold text-[15px] tabular-nums text-foreground leading-tight">
-                      {Math.round(e.amount).toLocaleString() } {currency}
+                      {Math.round(e.amount).toLocaleString()} {currency}
                     </p>
                     <p
                       className={`text-[11px] font-semibold tabular-nums mt-0.5 ${
