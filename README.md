@@ -8,13 +8,6 @@
   <strong>Partagez vos dépenses entre amis, sans friction.</strong>
 </p>
 
-<p align="center">
-  <a href="https://fairshare.vercel.app">Démo en ligne</a> ·
-  <a href="#fonctionnalités">Fonctionnalités</a> ·
-  <a href="#installation">Installation</a> ·
-  <a href="#technologies">Technologies</a>
-</p>
-
 ---
 
 ## 📖 Présentation
@@ -34,7 +27,6 @@ Développé dans le cadre du concours **Hackverse 3.0**, ce projet répond aux e
 - 📊 **Calcul automatique des soldes** : qui doit combien à qui
 - ⚡ **Algorithme de minimisation des transactions** (Greedy) pour limiter les virements
 - 📱 **Interface mobile-first** avec animations fluides (Framer Motion)
-- 🌙 **Thème clair/sombre** (optionnel selon version)
 - 📈 **Page d'activité** avec statistiques personnelles et graphiques (Recharts)
 - 👤 **Page de profil** avec résumé des dépenses et paramètres
 
@@ -139,24 +131,6 @@ fairshare/
 | `npx prisma studio`    | Ouvre Prisma Studio pour visualiser les données     |
 | `npx prisma db push`   | Synchronise le schéma avec la base de données       |
 | `npx prisma generate`  | Génère le client Prisma                             |
-
----
-
-## 🌐 Déploiement
-
-Le projet est optimisé pour un déploiement sur **Vercel** :
-
-1. Connecte ton dépôt GitHub à Vercel.
-2. Ajoute les variables d'environnement (`DATABASE_URL`, `DIRECT_URL`) dans les paramètres du projet.
-3. Vercel détecte automatiquement Next.js et déploie l'application.
-
-Assure-toi d'ajouter un script `postinstall` dans `package.json` pour générer le client Prisma à chaque build :
-
-```json
-"scripts": {
-  "postinstall": "prisma generate"
-}
-```
 
 ---
 

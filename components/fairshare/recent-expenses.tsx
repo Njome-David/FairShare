@@ -1,11 +1,21 @@
-// components/fairshare/recent-expenses.tsx
 "use client"
 
 import { motion } from "framer-motion"
 import { Receipt, Trash2 } from "lucide-react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 
-// ... (interface Expense inchangée)
+// ✅ Ajout de l'interface Expense
+interface Expense {
+  id: string
+  title: string
+  emoji: string
+  amount: number
+  paidBy: { name: string; initial: string; color: string }
+  splitCount: number
+  date: string
+  yourShare: number
+  youArePayer: boolean
+}
 
 interface RecentExpensesProps {
   expenses: Expense[]
@@ -35,7 +45,20 @@ export function RecentExpenses({ expenses, currency = "€", groupId }: RecentEx
 
   return (
     <section className="px-5 pb-36">
-      {/* ... en-tête inchangé ... */}
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-full bg-secondary flex items-center justify-center">
+            <Receipt className="w-3.5 h-3.5 text-foreground/50" strokeWidth={2.25} />
+          </div>
+          <h2 className="font-display font-semibold text-lg tracking-tight text-foreground">
+            Dépenses récentes
+          </h2>
+        </div>
+        <button className="text-xs font-semibold text-primary hover:underline underline-offset-4">
+          Voir tout
+        </button>
+      </div>
+
       <div className="flex flex-col gap-4">
         {Object.entries(grouped).map(([date, items]) => (
           <div key={date} className="flex flex-col gap-1.5">
