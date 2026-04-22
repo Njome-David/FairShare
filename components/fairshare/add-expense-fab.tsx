@@ -126,7 +126,7 @@ export function AddExpenseFab({ groupId, members }: AddExpenseFabProps) {
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent
           side="bottom"
-          className="rounded-t-3xl px-5 pb-8 pt-6 max-h-[70vh] overflow-y-auto"
+          className="rounded-t-3xl px-5 pb-8 pt-6 max-h-[70vh] overflow-y-auto max-w-md mx-auto"
         >
           <SheetHeader>
             <SheetTitle className="font-display text-2xl">Nouvelle dépense</SheetTitle>
