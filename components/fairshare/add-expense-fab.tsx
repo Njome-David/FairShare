@@ -141,13 +141,17 @@ export function AddExpenseFab({ groupId, members }: AddExpenseFabProps) {
               />
             </div>
             <div>
-              <Label htmlFor="amount">Montant (€)</Label>
+              <Label htmlFor="amount">Montant (FCFA)</Label>
               <Input
                 id="amount"
                 type="number"
-                step="0.01"
+                step="25"
                 value={amount}
-                onChange={(e) => setAmount(e.target.value)}
+                onChange={(e) => {
+                  const raw = parseFloat(e.target.value) || 0;
+                  const rounded = Math.round(raw / 25) * 25;
+                  setAmount(rounded.toString());
+                }}
                 placeholder="0.00"
                 className="h-12"
                 required

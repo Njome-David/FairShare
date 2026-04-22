@@ -7,6 +7,13 @@ export async function POST(req: NextRequest) {
     const { description, amount, payerId, groupId, splits } = await req.json();
 
     // Validations
+    if (amount % 25 !== 0) {
+      return NextResponse.json(
+        { error: 'Le montant doit être un multiple de 25 FCFA' },
+        { status: 400 }
+      );
+    }
+
     if (!description || !amount || !payerId || !groupId || !splits) {
       return NextResponse.json(
         { error: 'Tous les champs sont requis' },

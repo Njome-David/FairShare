@@ -23,7 +23,7 @@ interface RecentExpensesProps {
   groupId: string
 }
 
-export function RecentExpenses({ expenses, currency = "€", groupId }: RecentExpensesProps) {
+export function RecentExpenses({ expenses, currency = "FCFA", groupId }: RecentExpensesProps) {
   const queryClient = useQueryClient()
 
   const deleteExpense = useMutation({
@@ -95,7 +95,7 @@ export function RecentExpenses({ expenses, currency = "€", groupId }: RecentEx
                   </div>
                   <div className="text-right shrink-0">
                     <p className="font-display font-semibold text-[15px] tabular-nums text-foreground leading-tight">
-                      {e.amount.toFixed(2)}{currency}
+                      {Math.round(e.amount).toLocaleString()}{currency}
                     </p>
                     <p
                       className={`text-[11px] font-semibold tabular-nums mt-0.5 ${

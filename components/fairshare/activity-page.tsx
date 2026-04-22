@@ -1,4 +1,3 @@
-// components/fairshare/activity-page.tsx
 "use client"
 
 import { useUser } from "@/contexts/user-context"
@@ -45,25 +44,21 @@ export function ActivityPage() {
     )
   }
 
-  // Données pour le pie chart : répartition par groupe
   const pieData = stats?.recentGroups?.map(g => ({
     name: g.name,
     value: g.totalSpent,
   })) || []
 
-  // Si pas de groupes, données factices pour éviter un graphique vide
   const hasGroups = pieData.length > 0
 
   return (
     <div className="min-h-screen bg-background pb-24">
-      {/* Fond décoratif */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 rounded-full opacity-20 blur-3xl bg-primary/20" />
         <div className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full opacity-10 blur-3xl bg-primary/20" />
       </div>
 
       <div className="relative z-10 max-w-md mx-auto px-4 py-6">
-        {/* En-tête */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -75,13 +70,12 @@ export function ActivityPage() {
           </p>
         </motion.div>
 
-        {/* Cartes de métriques */}
         <div className="grid grid-cols-2 gap-3 mb-8">
           <MetricCard
             icon={CreditCard}
             label="Total dépensé"
             value={stats?.totalSpent ?? 0}
-            unit="€"
+            unit="FCFA"
             color="#00A550"
             delay={0.1}
           />
@@ -103,13 +97,12 @@ export function ActivityPage() {
             icon={TrendingUp}
             label="Moyenne/groupe"
             value={stats?.averagePerGroup ?? 0}
-            unit="€"
+            unit="FCFA"
             color="#7C3AED"
             delay={0.25}
           />
         </div>
 
-        {/* Graphique : répartition par groupe */}
         {hasGroups ? (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -135,13 +128,12 @@ export function ActivityPage() {
                     ))}
                   </Pie>
                   <Tooltip
-                    formatter={(value: number) => `${value.toFixed(2)}€`}
+                    formatter={(value: number) => `${Math.round(value).toLocaleString()} FCFA`}
                     contentStyle={{ borderRadius: "12px", border: "none", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}
                   />
                 </PieChart>
               </ResponsiveContainer>
             </div>
-            {/* Légende personnalisée en dessous */}
             <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 mt-4">
               {pieData.map((entry, index) => (
                 <div key={entry.name} className="flex items-center gap-1.5">
@@ -153,7 +145,7 @@ export function ActivityPage() {
                     {entry.name}
                   </span>
                   <span className="text-xs font-semibold text-foreground">
-                    {entry.value.toFixed(0)}€
+                    {Math.round(entry.value).toLocaleString()} FCFA
                   </span>
                 </div>
               ))}
@@ -176,7 +168,6 @@ export function ActivityPage() {
   )
 }
 
-// Composant carte de métrique
 function MetricCard({
   icon: Icon,
   label,
@@ -192,6 +183,7 @@ function MetricCard({
   color: string
   delay?: number
 }) {
+  const displayValue = unit ? Math.round(value).toLocaleString() : value
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
@@ -210,7 +202,7 @@ function MetricCard({
         <span className="text-xs text-muted-foreground">{label}</span>
       </div>
       <p className="text-2xl font-display font-bold text-foreground">
-        {value.toFixed(unit ? 0 : 0)}{unit}
+        {displayValue}{unit}
       </p>
     </motion.div>
   )

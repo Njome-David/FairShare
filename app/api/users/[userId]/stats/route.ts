@@ -63,7 +63,7 @@ export async function GET(
         recentGroups.push({
           id: group.id,
           name: group.name,
-          totalSpent: groupTotal,
+          totalSpent: Math.round(groupTotal),
           memberCount: group.members.length,
         });
       }
@@ -72,10 +72,10 @@ export async function GET(
     const averagePerGroup = groupsCount > 0 ? totalSpent / groupsCount : 0;
 
     return NextResponse.json({
-      totalSpent: Math.round(totalSpent * 100) / 100,
+      totalSpent: Math.round(totalSpent),
       groupsCount,
       expensesCount,
-      averagePerGroup: Math.round(averagePerGroup * 100) / 100,
+      averagePerGroup: Math.round(averagePerGroup),
       recentGroups, // utilisé pour le pie chart
     });
   } catch (error) {

@@ -48,14 +48,12 @@ export function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-background pb-24">
-      {/* Fond décoratif */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 rounded-full opacity-20 blur-3xl bg-primary/20" />
         <div className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full opacity-10 blur-3xl bg-primary/20" />
       </div>
 
       <div className="relative z-10 max-w-md mx-auto px-4 py-6">
-        {/* En-tête avec avatar */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -85,13 +83,12 @@ export function ProfilePage() {
           </div>
         </motion.div>
 
-        {/* Statistiques */}
         <div className="grid grid-cols-2 gap-3 mb-8">
           <StatCard
             icon={CreditCard}
             label="Total dépensé"
             value={stats?.totalSpent ?? 0}
-            unit="€"
+            unit="FCFA"
             color="#00A550"
             delay={0.1}
           />
@@ -113,13 +110,12 @@ export function ProfilePage() {
             icon={TrendingUp}
             label="Moyenne/groupe"
             value={stats?.averagePerGroup ?? 0}
-            unit="€"
+            unit="FCFA"
             color="#7C3AED"
             delay={0.25}
           />
         </div>
 
-        {/* Déconnexion */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -158,6 +154,7 @@ function StatCard({
   color: string
   delay?: number
 }) {
+  const displayValue = unit ? Math.round(value).toLocaleString() : value
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
@@ -176,7 +173,7 @@ function StatCard({
         <span className="text-xs text-muted-foreground">{label}</span>
       </div>
       <p className="text-2xl font-display font-bold text-foreground">
-        {value.toFixed(unit ? 0 : 0)}{unit}
+        {displayValue}{unit}
       </p>
     </motion.div>
   )

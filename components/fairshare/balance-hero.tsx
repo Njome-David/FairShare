@@ -8,7 +8,7 @@ interface BalanceHeroProps {
   currency?: string
 }
 
-export function BalanceHero({ netBalance, currency = "€" }: BalanceHeroProps) {
+export function BalanceHero({ netBalance, currency = "FCFA" }: BalanceHeroProps) {
   const isCreditor = netBalance >= 0
   const absBalance = Math.abs(netBalance)
 
@@ -43,7 +43,7 @@ export function BalanceHero({ netBalance, currency = "€" }: BalanceHeroProps) 
               isCreditor ? "text-primary" : "text-destructive"
             }`}
           >
-            {absBalance.toFixed(2)}
+            {Math.round(absBalance).toLocaleString()}
           </span>
           <span
             className={`font-display font-semibold text-3xl ${

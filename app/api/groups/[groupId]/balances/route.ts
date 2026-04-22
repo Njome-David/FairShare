@@ -51,7 +51,7 @@ export async function GET(
       return {
         userId,
         pseudo: member?.user.pseudo || 'Inconnu',
-        amount: Math.round(amount * 100) / 100 // Arrondi à 2 décimales
+        amount: Math.round(amount) // Arrondi à 2 décimales
       };
     });
 
@@ -67,7 +67,7 @@ export async function GET(
         fromPseudo: fromMember?.user.pseudo || 'Inconnu',
         to: t.to,
         toPseudo: toMember?.user.pseudo || 'Inconnu',
-        amount: Math.round(t.amount * 100) / 100
+        amount: Math.round(t.amount) 
       };
     });
 
@@ -77,7 +77,7 @@ export async function GET(
     return NextResponse.json({
       groupId,
       groupName: group.name,
-      totalSpent: Math.round(totalSpent * 100) / 100,
+      totalSpent: Math.round(totalSpent),
       membersCount: group.members.length,
       netBalances: balancesWithNames,
       suggestedTransactions: transactions

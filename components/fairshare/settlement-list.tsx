@@ -20,7 +20,7 @@ interface SettlementListProps {
 
 export function SettlementList({
   settlements,
-  currency = "€",
+  currency = "FCFA",
   originalTransactionCount = 12,
 }: SettlementListProps) {
   const [settled, setSettled] = useState<Set<string>>(new Set())
@@ -141,7 +141,7 @@ export function SettlementList({
                         isSettled ? "text-muted-foreground line-through" : "text-foreground"
                       }`}
                     >
-                      {s.amount.toFixed(2)}{currency}
+                      {Math.round(s.amount).toLocaleString()}{currency}
                     </p>
                   </div>
 

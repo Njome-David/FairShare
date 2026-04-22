@@ -15,7 +15,7 @@
 FairShare est une application web de gestion de dépenses en groupe, conçue pour simplifier le partage des frais lors de voyages, sorties, colocations ou événements entre amis.  
 Grâce à un algorithme intelligent de **minimisation des transactions**, FairShare réduit le nombre de virements nécessaires pour équilibrer les comptes.
 
-Développé dans le cadre du concours **Hackverse 3.0**, ce projet répond aux exigences d'un MVP moderne : interface mobile-first, temps réel, et architecture scalable.
+Développé dans le cadre du concours **Hackverse 3.0 (Projet 4)**, ce projet répond aux exigences d'un MVP moderne : interface mobile-first, temps réel, et architecture scalable.
 
 ---
 
