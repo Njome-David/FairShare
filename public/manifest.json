@@ -1,0 +1,25 @@
+{
+  "name": "FairShare",
+  "short_name": "Fairshare",
+  "description": "Partagez vos dépenses entre amis, sans friction",
+  "theme_color": "#00A550",
+  "background_color": "#F2F4F2",
+  "display": "standalone",
+  "orientation": "portrait",
+  "scope": "/",
+  "start_url": "/",
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
