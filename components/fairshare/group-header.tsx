@@ -1,32 +1,39 @@
+// components/fairshare/group-header.tsx
 "use client"
 
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Check, Copy, MoreHorizontal, UserPlus } from "lucide-react"
+import { Check, Copy, UserPlus, Users } from "lucide-react"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 
 type Member = {
   id: string
   name: string
-  color: string
   initial: string
+  color: string
 }
 
 interface GroupHeaderProps {
   groupName: string
   inviteCode: string
   members: Member[]
-  subtitle?: string
-  emoji?: string
+  totalSpent?: number
 }
 
 export function GroupHeader({
   groupName,
   inviteCode,
   members,
-  subtitle = "Voyage · Mars 2026",
-  emoji = "🏖️",
+  totalSpent,
 }: GroupHeaderProps) {
   const [copied, setCopied] = useState(false)
+  const [showMembers, setShowMembers] = useState(false)
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(inviteCode)
@@ -36,60 +43,66 @@ export function GroupHeader({
 
   return (
     <header className="px-5 pt-2 pb-5">
-      {/* Title row */}
       <div className="flex items-start justify-between gap-4 mb-5">
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="text-2xl leading-none" aria-hidden>
-              {emoji}
-            </div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-primary">
-              {subtitle}
-            </p>
-          </div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-primary mb-2">
+            Total dépensé · {totalSpent?.toFixed(2)}€
+          </p>
           <h1 className="font-display text-[34px] leading-[1.02] font-bold text-balance tracking-tight text-foreground">
             {groupName}
           </h1>
         </div>
-        <button
-          className="shrink-0 w-10 h-10 rounded-full flex items-center justify-center bg-white border border-border shadow-sm active:scale-95 transition-transform"
-          aria-label="Options du groupe"
-        >
-          <MoreHorizontal className="w-5 h-5 text-foreground/60" />
-        </button>
+        {/* Bouton 3 points retiré */}
       </div>
 
-      {/* Members row + invite action */}
+      {/* Members row + invite */}
       <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <div className="flex -space-x-2.5">
-            {members.slice(0, 4).map((m) => (
-              <div
-                key={m.id}
-                className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold text-white border-[2.5px] border-background shadow-sm"
-                style={{ backgroundColor: m.color }}
-                title={m.name}
-              >
-                {m.initial}
+        <Dialog open={showMembers} onOpenChange={setShowMembers}>
+          <DialogTrigger asChild>
+            <button className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity">
+              <div className="flex -space-x-2.5">
+                {members.slice(0, 4).map((m) => (
+                  <div
+                    key={m.id}
+                    className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold text-white border-[2.5px] border-background shadow-sm"
+                    style={{ backgroundColor: m.color }}
+                    title={m.name}
+                  >
+                    {m.initial}
+                  </div>
+                ))}
+                {members.length > 4 && (
+                  <div className="w-9 h-9 rounded-full flex items-center justify-center text-[11px] font-bold bg-secondary border-[2.5px] border-background text-foreground/70 shadow-sm">
+                    +{members.length - 4}
+                  </div>
+                )}
               </div>
-            ))}
-            {members.length > 4 && (
-              <div className="w-9 h-9 rounded-full flex items-center justify-center text-[11px] font-bold bg-secondary border-[2.5px] border-background text-foreground/70 shadow-sm">
-                +{members.length - 4}
-              </div>
-            )}
-          </div>
-          <div className="flex flex-col leading-tight">
-            <span className="text-[13px] font-semibold text-foreground">
-              {members.length} membres
-            </span>
-            <span className="text-[11px] text-muted-foreground">
-              Tous actifs
-            </span>
-          </div>
-        </div>
+              <span className="text-[13px] font-semibold text-foreground">
+                {members.length} membres
+              </span>
+            </button>
+          </DialogTrigger>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle>Membres du groupe</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-2 mt-4">
+              {members.map((m) => (
+                <div key={m.id} className="flex items-center gap-3 p-2 rounded-lg">
+                  <div
+                    className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white"
+                    style={{ backgroundColor: m.color }}
+                  >
+                    {m.initial}
+                  </div>
+                  <span className="font-medium">{m.name}</span>
+                </div>
+              ))}
+            </div>
+          </DialogContent>
+        </Dialog>
 
-        {/* Invite code pill */}
+        {/* Invite code pill avec toast intégré */}
         <motion.button
           onClick={handleCopy}
           whileTap={{ scale: 0.97 }}
@@ -128,22 +141,21 @@ export function GroupHeader({
               )}
             </AnimatePresence>
           </div>
+          {/* Toast "copié" inline */}
+          <AnimatePresence>
+            {copied && (
+              <motion.span
+                initial={{ opacity: 0, x: -5 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0 }}
+                className="absolute left-1/2 -translate-x-1/2 -bottom-6 text-[10px] font-semibold text-primary whitespace-nowrap"
+              >
+                Copié !
+              </motion.span>
+            )}
+          </AnimatePresence>
         </motion.button>
       </div>
-
-      {/* Toast feedback */}
-      <AnimatePresence>
-        {copied && (
-          <motion.div
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            className="absolute right-5 mt-2 text-[11px] font-semibold text-primary"
-          >
-            Code copié
-          </motion.div>
-        )}
-      </AnimatePresence>
     </header>
   )
 }

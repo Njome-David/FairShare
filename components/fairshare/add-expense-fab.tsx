@@ -1,117 +1,193 @@
+// components/fairshare/add-expense-fab.tsx
 "use client"
 
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Plus } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Checkbox } from "@/components/ui/checkbox"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet"
+import { useUser } from "@/contexts/user-context"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 
-export function AddExpenseFab() {
-  const [isOpen, setIsOpen] = useState(false)
+interface Member {
+  id: string
+  name: string
+  initial: string
+  color: string
+}
+
+interface AddExpenseFabProps {
+  groupId: string
+  members: Member[]
+}
+
+export function AddExpenseFab({ groupId, members }: AddExpenseFabProps) {
+  const { user } = useUser()
+  const queryClient = useQueryClient()
+  const [open, setOpen] = useState(false)
+  const [description, setDescription] = useState("")
+  const [amount, setAmount] = useState("")
+  const [payerId, setPayerId] = useState(user?.id || "")
+  const [selectedParticipants, setSelectedParticipants] = useState<string[]>([])
+
+  const createExpense = useMutation({
+    mutationFn: async (data: any) => {
+      const res = await fetch("/api/expenses", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      })
+      if (!res.ok) throw new Error("Erreur création dépense")
+      return res.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["group", groupId] })
+      queryClient.invalidateQueries({ queryKey: ["balances", groupId] })
+      setOpen(false)
+      resetForm()
+    },
+  })
+
+  const resetForm = () => {
+    setDescription("")
+    setAmount("")
+    setPayerId(user?.id || "")
+    setSelectedParticipants([])
+  }
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    const numAmount = parseFloat(amount)
+    if (isNaN(numAmount) || numAmount <= 0) return
+    if (selectedParticipants.length === 0) return
+
+    const sharePerPerson = numAmount / selectedParticipants.length
+    const splits = selectedParticipants.map(userId => ({
+      userId,
+      share: sharePerPerson,
+    }))
+
+    createExpense.mutate({
+      description,
+      amount: numAmount,
+      payerId,
+      groupId,
+      splits,
+    })
+  }
+
+  const toggleParticipant = (userId: string) => {
+    setSelectedParticipants(prev =>
+      prev.includes(userId)
+        ? prev.filter(id => id !== userId)
+        : [...prev, userId]
+    )
+  }
 
   return (
     <>
-      {/* Backdrop */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setIsOpen(false)}
-            className="fixed inset-0 z-40 bg-foreground/20 backdrop-blur-sm"
-          />
-        )}
-      </AnimatePresence>
-
-      {/* Bottom sheet */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ y: "100%" }}
-            animate={{ y: 0 }}
-            exit={{ y: "100%" }}
-            transition={{ type: "spring", stiffness: 300, damping: 32 }}
-            className="fixed bottom-0 left-0 right-0 z-50 mx-auto max-w-md rounded-t-3xl border-t border-border bg-background p-6 pb-8 shadow-[0_-8px_40px_rgba(0,0,0,0.12)]"
-          >
-            <div className="w-10 h-1 rounded-full bg-border mx-auto mb-5" />
-            <h3 className="font-display font-bold text-2xl mb-1 tracking-tight text-foreground">
-              Nouvelle depense
-            </h3>
-            <p className="text-sm text-muted-foreground mb-6">
-              Qui a paye quoi, pour qui ?
-            </p>
-
-            <div className="flex flex-col gap-3">
-              <div className="p-4 rounded-2xl bg-white border border-border shadow-sm">
-                <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
-                  Montant
-                </label>
-                <div className="flex items-baseline gap-1 mt-1">
-                  <span className="font-display font-bold text-4xl text-foreground tabular-nums">
-                    0
-                  </span>
-                  <span className="font-display font-semibold text-2xl text-muted-foreground">
-                    ,00 €
-                  </span>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-4 gap-2">
-                {["🍕", "🚕", "🏠", "🎟️"].map((emoji) => (
-                  <button
-                    key={emoji}
-                    className="aspect-square rounded-2xl bg-white border border-border shadow-sm hover:border-primary/40 hover:bg-primary/5 transition-all text-2xl active:scale-95"
-                  >
-                    {emoji}
-                  </button>
-                ))}
-              </div>
-
-              <button className="w-full h-12 rounded-2xl bg-primary text-primary-foreground font-semibold text-sm active:scale-[0.98] transition-transform glow-emerald">
-                Enregistrer la depense
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Floating FAB — centré au-dessus de la bottom nav */}
-      <div className="fixed bottom-[34px] left-0 right-0 z-40 flex justify-center pointer-events-none">
+      {/* FAB */}
+      <div className="fixed bottom-20 left-0 right-0 z-40 flex justify-center pointer-events-none">
         <div className="relative pointer-events-auto">
-          {/* Outer breathing halo */}
-          {!isOpen && (
+          {!open && (
             <motion.div
-              animate={{
-                scale: [1, 1.35, 1],
-                opacity: [0.4, 0, 0.4],
-              }}
-              transition={{
-                duration: 2.4,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
+              animate={{ scale: [1, 1.35, 1], opacity: [0.4, 0, 0.4] }}
+              transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
               className="absolute inset-0 rounded-full bg-primary/40 blur-xl"
             />
           )}
-
           <motion.button
-            onClick={() => setIsOpen(!isOpen)}
+            onClick={() => setOpen(true)}
             whileTap={{ scale: 0.9 }}
             whileHover={{ scale: 1.06 }}
-            transition={{ type: "spring", stiffness: 400, damping: 18 }}
-            className={`relative flex items-center justify-center w-14 h-14 rounded-full bg-primary text-primary-foreground glow-emerald glow-emerald-hover ${
-              !isOpen ? "animate-breathe" : ""
-            }`}
-            aria-label={isOpen ? "Fermer" : "Ajouter une depense"}
+            className="relative flex items-center justify-center w-14 h-14 rounded-full bg-primary text-primary-foreground shadow-lg"
           >
-            <motion.div
-              animate={{ rotate: isOpen ? 135 : 0 }}
-              transition={{ type: "spring", stiffness: 300, damping: 20 }}
-            >
-              <Plus className="w-6 h-6" strokeWidth={2.75} />
-            </motion.div>
+            <Plus className="w-6 h-6" strokeWidth={2.75} />
           </motion.button>
         </div>
       </div>
+
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetContent side="bottom" className="h-[85vh] rounded-t-3xl">
+          <SheetHeader>
+            <SheetTitle className="font-display text-2xl">Nouvelle dépense</SheetTitle>
+          </SheetHeader>
+          <form onSubmit={handleSubmit} className="space-y-5 mt-6">
+            <div>
+              <Label htmlFor="desc">Description</Label>
+              <Input
+                id="desc"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Ex: Dîner"
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="amount">Montant (€)</Label>
+              <Input
+                id="amount"
+                type="number"
+                step="0.01"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                placeholder="0.00"
+                required
+              />
+            </div>
+            <div>
+              <Label>Payé par</Label>
+              <Select value={payerId} onValueChange={setPayerId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Sélectionner le payeur" />
+                </SelectTrigger>
+                <SelectContent>
+                  {members.map((m) => (
+                    <SelectItem key={m.id} value={m.id}>
+                      {m.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Participants</Label>
+              <div className="space-y-2 mt-2 max-h-48 overflow-y-auto">
+                {members.map((m) => (
+                  <div key={m.id} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`participant-${m.id}`}
+                      checked={selectedParticipants.includes(m.id)}
+                      onCheckedChange={() => toggleParticipant(m.id)}
+                    />
+                    <label htmlFor={`participant-${m.id}`} className="text-sm">
+                      {m.name}
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <Button type="submit" className="w-full" disabled={createExpense.isPending}>
+              {createExpense.isPending ? "Ajout..." : "Ajouter la dépense"}
+            </Button>
+          </form>
+        </SheetContent>
+      </Sheet>
     </>
   )
 }

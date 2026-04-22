@@ -1,122 +1,96 @@
+// components/fairshare/group-dashboard.tsx
 "use client"
 
-import { BrandBar } from "@/components/fairshare/brand-bar"
-import { GroupHeader } from "@/components/fairshare/group-header"
-import { BalanceHero } from "@/components/fairshare/balance-hero"
-import { SettlementList } from "@/components/fairshare/settlement-list"
-import { RecentExpenses } from "@/components/fairshare/recent-expenses"
-import { AddExpenseFab } from "@/components/fairshare/add-expense-fab"
-import { BottomNav } from "@/components/fairshare/bottom-nav"
-
-interface Group {
-  id: string
-  name: string
-  emoji: string
-  memberCount: number
-  lastActivity: string
-  inviteCode: string
-}
+import { useQuery } from "@tanstack/react-query"
+import { Loader2 } from "lucide-react"
+import { BrandBar } from "./brand-bar"
+import { GroupHeader } from "./group-header"
+import { BalanceHero } from "./balance-hero"
+import { SettlementList } from "./settlement-list"
+import { RecentExpenses } from "./recent-expenses"
+import { AddExpenseFab } from "./add-expense-fab"
+import { BottomNav } from "./bottom-nav"
+import { useUser } from "@/contexts/user-context"
 
 interface GroupDashboardProps {
-  group: Group
-  pseudo: string
+  groupId: string
   onBack: () => void
 }
 
-// Sample data
-const members = [
-  { id: "1", name: "Toi", initial: "T", color: "#00A550" },
-  { id: "2", name: "Marie", initial: "M", color: "#E05260" },
-  { id: "3", name: "Alex", initial: "A", color: "#0288D1" },
-  { id: "4", name: "Lea", initial: "L", color: "#D97706" },
-  { id: "5", name: "Sam", initial: "S", color: "#7C3AED" },
-]
+export function GroupDashboard({ groupId, onBack }: GroupDashboardProps) {
+  const { user } = useUser()
 
-const settlements = [
-  {
-    id: "s1",
-    from: members[2],
-    to: members[0],
-    amount: 48.5,
-    emoji: "✈️",
-  },
-  {
-    id: "s2",
-    from: members[3],
-    to: members[0],
-    amount: 32.0,
-    emoji: "🏠",
-  },
-  {
-    id: "s3",
-    from: members[0],
-    to: members[1],
-    amount: 18.25,
-    emoji: "🍕",
-  },
-]
+  // Récupérer les détails du groupe
+  const { data: group, isLoading: groupLoading } = useQuery({
+    queryKey: ["group", groupId],
+    queryFn: () => fetch(`/api/groups/${groupId}`).then(res => res.json()),
+  })
 
-const recentExpenses = [
-  {
-    id: "e1",
-    title: "Airbnb Alfama",
-    emoji: "🏠",
-    amount: 320.0,
-    paidBy: members[0],
-    splitCount: 5,
-    date: "Hier",
-    yourShare: 64.0,
-    youArePayer: true,
-  },
-  {
-    id: "e2",
-    title: "Diner Time Out Market",
-    emoji: "🍽️",
-    amount: 127.4,
-    paidBy: members[1],
-    splitCount: 5,
-    date: "Hier",
-    yourShare: 25.48,
-    youArePayer: false,
-  },
-  {
-    id: "e3",
-    title: "Billets Tramway 28",
-    emoji: "🚋",
-    amount: 15.0,
-    paidBy: members[2],
-    splitCount: 5,
-    date: "Il y a 2 jours",
-    yourShare: 3.0,
-    youArePayer: false,
-  },
-  {
-    id: "e4",
-    title: "Pasteis de Belem",
-    emoji: "🥐",
-    amount: 22.5,
-    paidBy: members[0],
-    splitCount: 5,
-    date: "Il y a 2 jours",
-    yourShare: 4.5,
-    youArePayer: true,
-  },
-]
+  // Récupérer les balances
+  const { data: balances, isLoading: balancesLoading } = useQuery({
+    queryKey: ["balances", groupId],
+    queryFn: () => fetch(`/api/groups/${groupId}/balances`).then(res => res.json()),
+  })
 
-export function GroupDashboard({ group, pseudo, onBack }: GroupDashboardProps) {
-  const totalOwedToYou = 80.5
-  const totalYouOwe = 18.25
-  const netBalance = totalOwedToYou - totalYouOwe
+  if (groupLoading || balancesLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
+  }
 
-  // Update the first member name to pseudo
-  const updatedMembers = members.map((m, i) =>
-    i === 0 ? { ...m, name: pseudo, initial: pseudo[0].toUpperCase() } : m
-  )
+  // Préparer les données pour les composants enfants
+  const members = group.members.map((m: any) => ({
+    id: m.userId,
+    name: m.user.pseudo,
+    initial: m.user.pseudo[0].toUpperCase(),
+    color: `hsl(${Math.abs(m.userId.split('').reduce((acc: number, c: string) => acc + c.charCodeAt(0), 0)) % 360}, 70%, 50%)`, // couleur stable basée sur l'ID
+  }))
+
+  // Calculer le solde net de l'utilisateur courant
+  const currentUserBalance = balances.netBalances.find((b: any) => b.userId === user?.id)
+  const netBalance = currentUserBalance?.amount || 0
+  const totalOwedToYou = balances.netBalances
+    .filter((b: any) => b.amount > 0)
+    .reduce((sum: number, b: any) => sum + b.amount, 0)
+  const totalYouOwe = balances.netBalances
+    .filter((b: any) => b.amount < 0)
+    .reduce((sum: number, b: any) => sum + Math.abs(b.amount), 0)
+
+  // Formater les transactions suggérées pour SettlementList
+  const settlements = balances.suggestedTransactions.map((t: any) => {
+    const fromMember = members.find((m: any) => m.id === t.from)
+    const toMember = members.find((m: any) => m.id === t.to)
+    return {
+      id: `${t.from}-${t.to}`,
+      from: fromMember,
+      to: toMember,
+      amount: t.amount,
+      emoji: "💸",
+    }
+  })
+
+  // Formater les dépenses récentes
+  const recentExpenses = group.expenses.map((e: any) => {
+    const payer = members.find((m: any) => m.id === e.payerId)
+    const yourShare = e.splits.find((s: any) => s.userId === user?.id)?.share || 0
+    return {
+      id: e.id,
+      title: e.description,
+      emoji: "💰", // à améliorer
+      amount: e.amount,
+      paidBy: payer,
+      splitCount: e.splits.length,
+      date: new Date(e.createdAt).toLocaleDateString("fr-FR", { day: "numeric", month: "short" }),
+      yourShare,
+      youArePayer: e.payerId === user?.id,
+    }
+  })
 
   return (
     <main className="min-h-screen bg-background text-foreground overflow-x-hidden">
       <div className="relative mx-auto max-w-md min-h-screen">
-        {/* Ambient gradient */}
         <div
           className="pointer-events-none absolute inset-x-0 top-0 h-[420px] opacity-40"
           style={{
@@ -130,9 +104,9 @@ export function GroupDashboard({ group, pseudo, onBack }: GroupDashboardProps) {
 
           <GroupHeader
             groupName={group.name}
-            emoji={group.emoji}
             inviteCode={group.inviteCode}
-            members={updatedMembers}
+            members={members}
+            totalSpent={group.totalSpent}
           />
 
           <BalanceHero
@@ -142,23 +116,17 @@ export function GroupDashboard({ group, pseudo, onBack }: GroupDashboardProps) {
           />
 
           <SettlementList
-            settlements={settlements.map((s) => ({
-              ...s,
-              from: s.from.id === "1" ? { ...s.from, name: pseudo, initial: pseudo[0].toUpperCase() } : s.from,
-              to: s.to.id === "1" ? { ...s.to, name: pseudo, initial: pseudo[0].toUpperCase() } : s.to,
-            }))}
-            originalTransactionCount={12}
+            settlements={settlements}
+            originalTransactionCount={group.expenses.length * 2} // approximatif
           />
 
           <RecentExpenses
-            expenses={recentExpenses.map((e) => ({
-              ...e,
-              paidBy: e.paidBy.id === "1" ? { ...e.paidBy, name: pseudo, initial: pseudo[0].toUpperCase() } : e.paidBy,
-            }))}
+            expenses={recentExpenses}
+            groupId={groupId}
           />
         </div>
 
-        <AddExpenseFab />
+        <AddExpenseFab groupId={groupId} members={members} />
         <BottomNav />
       </div>
     </main>

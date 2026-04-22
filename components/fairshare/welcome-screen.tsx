@@ -1,3 +1,4 @@
+// components/fairshare/welcome-screen.tsx
 "use client"
 
 import { useState } from "react"
@@ -5,33 +6,38 @@ import { motion } from "framer-motion"
 import { ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { useUser } from "@/contexts/user-context"
 import Image from "next/image"
 
-interface WelcomeScreenProps {
-  onSubmit: (pseudo: string) => void
-}
-
-export function WelcomeScreen({ onSubmit }: WelcomeScreenProps) {
+export function WelcomeScreen() {
+  const { login } = useUser()
   const [pseudo, setPseudo] = useState("")
   const [error, setError] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     const trimmed = pseudo.trim()
     if (trimmed.length < 2) {
-      setError("Minimum 2 caracteres")
+      setError("Minimum 2 caractères")
       return
     }
     if (trimmed.length > 20) {
-      setError("Maximum 20 caracteres")
+      setError("Maximum 20 caractères")
       return
     }
-    onSubmit(trimmed)
+    setIsLoading(true)
+    try {
+      await login(trimmed)
+    } catch (err) {
+      setError("Erreur de connexion, réessayez")
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6">
-      {/* Ambient gradient */}
       <div
         className="pointer-events-none fixed inset-0 opacity-50"
         style={{
@@ -46,7 +52,6 @@ export function WelcomeScreen({ onSubmit }: WelcomeScreenProps) {
         transition={{ duration: 0.5 }}
         className="relative z-10 w-full max-w-sm flex flex-col items-center"
       >
-        {/* Logo */}
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -64,7 +69,6 @@ export function WelcomeScreen({ onSubmit }: WelcomeScreenProps) {
           </div>
         </motion.div>
 
-        {/* Tagline */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -75,11 +79,10 @@ export function WelcomeScreen({ onSubmit }: WelcomeScreenProps) {
             Bienvenue sur FairShare
           </h1>
           <p className="text-foreground/70 text-sm">
-            Partagez vos depenses entre amis, sans friction.
+            Partagez vos dépenses entre amis, sans friction.
           </p>
         </motion.div>
 
-        {/* Form */}
         <motion.form
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -100,6 +103,7 @@ export function WelcomeScreen({ onSubmit }: WelcomeScreenProps) {
               autoFocus
               autoComplete="off"
               autoCapitalize="words"
+              disabled={isLoading}
             />
             {error && (
               <motion.p
@@ -114,23 +118,14 @@ export function WelcomeScreen({ onSubmit }: WelcomeScreenProps) {
 
           <Button
             type="submit"
-            disabled={pseudo.trim().length < 2}
+            disabled={pseudo.trim().length < 2 || isLoading}
             className="w-full h-14 text-base font-semibold rounded-2xl bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20 disabled:opacity-40 disabled:shadow-none transition-all"
           >
-            <span>Entrer</span>
-            <ArrowRight className="w-5 h-5 ml-2" />
+            {isLoading ? "Connexion..." : "Entrer"}
+            {!isLoading && <ArrowRight className="w-5 h-5 ml-2" />}
           </Button>
         </motion.form>
-
-        {/* Footer note */}
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5, duration: 0.4 }}
-          className="mt-8 text-xs text-foreground/50 text-center"
-        >
-          Vos donnees restent sur votre appareil
-        </motion.p>
+        {/* Footer supprimé */}
       </motion.div>
     </div>
   )

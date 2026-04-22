@@ -1,25 +1,27 @@
+// components/fairshare/bottom-nav.tsx
 "use client"
 
-import { useState } from "react"
 import { motion } from "framer-motion"
 import { Home, Users, Activity, User } from "lucide-react"
 
 const tabs = [
   { id: "home", icon: Home, label: "Accueil" },
   { id: "groups", icon: Users, label: "Groupes" },
-  { id: "activity", icon: Activity, label: "Activite" },
+  { id: "activity", icon: Activity, label: "Activité" },
   { id: "profile", icon: User, label: "Profil" },
-]
+] as const
 
-export function BottomNav() {
-  const [active, setActive] = useState("home")
+interface BottomNavProps {
+  active: typeof tabs[number]["id"]
+  onTabChange: (id: typeof tabs[number]["id"]) => void
+}
 
+export function BottomNav({ active, onTabChange }: BottomNavProps) {
   return (
     <nav
       className="fixed bottom-0 left-0 right-0 z-30 mx-auto max-w-md"
       aria-label="Navigation principale"
     >
-      {/* Fade mask */}
       <div
         className="absolute inset-x-0 bottom-full h-8 pointer-events-none"
         style={{
@@ -29,26 +31,21 @@ export function BottomNav() {
 
       <div className="relative mx-4 mb-3 h-16 rounded-full border border-border bg-white/90 backdrop-blur-xl shadow-[0_-2px_24px_rgba(0,0,0,0.08)]">
         <div className="relative grid grid-cols-5 h-full items-center">
-          {/* Left side tabs */}
           {tabs.slice(0, 2).map((tab) => (
             <TabButton
               key={tab.id}
               tab={tab}
               isActive={active === tab.id}
-              onClick={() => setActive(tab.id)}
+              onClick={() => onTabChange(tab.id)}
             />
           ))}
-
-          {/* Center placeholder for FAB */}
           <div aria-hidden />
-
-          {/* Right side tabs */}
           {tabs.slice(2).map((tab) => (
             <TabButton
               key={tab.id}
               tab={tab}
               isActive={active === tab.id}
-              onClick={() => setActive(tab.id)}
+              onClick={() => onTabChange(tab.id)}
             />
           ))}
         </div>
@@ -57,15 +54,7 @@ export function BottomNav() {
   )
 }
 
-function TabButton({
-  tab,
-  isActive,
-  onClick,
-}: {
-  tab: { id: string; icon: typeof Home; label: string }
-  isActive: boolean
-  onClick: () => void
-}) {
+function TabButton({ tab, isActive, onClick }: any) {
   const Icon = tab.icon
   return (
     <button

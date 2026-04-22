@@ -1,18 +1,17 @@
+// components/fairshare/brand-bar.tsx
 "use client"
 
 import Image from "next/image"
 import { motion } from "framer-motion"
-import { Bell, ChevronLeft } from "lucide-react"
+import { ChevronLeft } from "lucide-react"
 
 interface BrandBarProps {
   onBack?: () => void
-  unreadCount?: number
 }
 
-export function BrandBar({ onBack, unreadCount = 2 }: BrandBarProps) {
+export function BrandBar({ onBack }: BrandBarProps) {
   return (
     <div className="relative z-10 flex items-center justify-between px-5 pt-5 pb-3">
-      {/* Back button */}
       <button
         onClick={onBack}
         className="flex items-center justify-center w-10 h-10 rounded-full bg-white border border-border shadow-sm active:scale-95 transition-transform"
@@ -21,7 +20,6 @@ export function BrandBar({ onBack, unreadCount = 2 }: BrandBarProps) {
         <ChevronLeft className="w-5 h-5 text-foreground/70" />
       </button>
 
-      {/* Logo carré — fond identique au fond de l'app pour continuité visuelle */}
       <motion.div
         initial={{ opacity: 0, y: -6 }}
         animate={{ opacity: 1, y: 0 }}
@@ -40,16 +38,8 @@ export function BrandBar({ onBack, unreadCount = 2 }: BrandBarProps) {
         />
       </motion.div>
 
-      {/* Notifications */}
-      <button
-        className="relative flex items-center justify-center w-10 h-10 rounded-full bg-white border border-border shadow-sm active:scale-95 transition-transform"
-        aria-label={`Notifications (${unreadCount} non lues)`}
-      >
-        <Bell className="w-[18px] h-[18px] text-foreground/70" strokeWidth={2} />
-        {unreadCount > 0 && (
-          <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-primary ring-2 ring-background animate-pulse" />
-        )}
-      </button>
+      {/* Espace vide pour équilibrer */}
+      <div className="w-10 h-10" />
     </div>
   )
 }
