@@ -38,6 +38,7 @@ export function RecentExpenses({ expenses, currency = "FCFA", groupId }: RecentE
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["group", groupId] })
       queryClient.invalidateQueries({ queryKey: ["balances", groupId] })
+      queryClient.invalidateQueries({ queryKey: ["user-stats"] })
     },
   })
 

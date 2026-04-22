@@ -63,6 +63,7 @@ export function GroupsList({ onSelectGroup }: GroupsListProps) {
     },
     onSuccess: (newGroup) => {
       queryClient.invalidateQueries({ queryKey: ["groups"] })
+      queryClient.invalidateQueries({ queryKey: ["user-stats"] })
       setShowCreateModal(false)
       setNewGroupName("")
       setCreateError("")
@@ -89,6 +90,7 @@ export function GroupsList({ onSelectGroup }: GroupsListProps) {
     },
     onSuccess: (joinedGroup) => {
       queryClient.invalidateQueries({ queryKey: ["groups"] })
+      queryClient.invalidateQueries({ queryKey: ["user-stats"] })
       setShowJoinModal(false)
       setJoinCode("")
       setJoinError("")

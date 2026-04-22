@@ -23,12 +23,16 @@ export function GroupDashboard({ groupId, onBack }: GroupDashboardProps) {
   const { data: group, isLoading: groupLoading } = useQuery({
     queryKey: ["group", groupId],
     queryFn: () => fetch(`/api/groups/${groupId}`).then(res => res.json()),
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   })
 
   // Récupérer les balances
   const { data: balances, isLoading: balancesLoading } = useQuery({
     queryKey: ["balances", groupId],
     queryFn: () => fetch(`/api/groups/${groupId}/balances`).then(res => res.json()),
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   })
 
   if (groupLoading || balancesLoading) {

@@ -59,6 +59,7 @@ export function AddExpenseFab({ groupId, members }: AddExpenseFabProps) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["group", groupId] })
       queryClient.invalidateQueries({ queryKey: ["balances", groupId] })
+      queryClient.invalidateQueries({ queryKey: ["user-stats"] })
       setOpen(false)
       resetForm()
     },
