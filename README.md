@@ -1,36 +1,179 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# FairShare
 
-## Getting Started
+<p align="center">
+  <img src="/public/fairshare-logo.svg" alt="FairShare Logo" width="120" />
+</p>
 
-First, run the development server:
+<p align="center">
+  <strong>Partagez vos dépenses entre amis, sans friction.</strong>
+</p>
+
+<p align="center">
+  <a href="https://fairshare.vercel.app">Démo en ligne</a> ·
+  <a href="#fonctionnalités">Fonctionnalités</a> ·
+  <a href="#installation">Installation</a> ·
+  <a href="#technologies">Technologies</a>
+</p>
+
+---
+
+## 📖 Présentation
+
+FairShare est une application web de gestion de dépenses en groupe, conçue pour simplifier le partage des frais lors de voyages, sorties, colocations ou événements entre amis.  
+Grâce à un algorithme intelligent de **minimisation des transactions**, FairShare réduit le nombre de virements nécessaires pour équilibrer les comptes.
+
+Développé dans le cadre du concours **Hackverse 3.0**, ce projet répond aux exigences d'un MVP moderne : interface mobile-first, temps réel, et architecture scalable.
+
+---
+
+## ✨ Fonctionnalités
+
+- 🔐 **Authentification simplifiée** par pseudo (sans mot de passe)
+- 👥 **Création et gestion de groupes** avec code d'invitation unique
+- 💸 **Ajout de dépenses partagées** avec répartition équitable ou personnalisée
+- 📊 **Calcul automatique des soldes** : qui doit combien à qui
+- ⚡ **Algorithme de minimisation des transactions** (Greedy) pour limiter les virements
+- 📱 **Interface mobile-first** avec animations fluides (Framer Motion)
+- 🌙 **Thème clair/sombre** (optionnel selon version)
+- 📈 **Page d'activité** avec statistiques personnelles et graphiques (Recharts)
+- 👤 **Page de profil** avec résumé des dépenses et paramètres
+
+---
+
+## 🛠️ Technologies
+
+| Catégorie            | Outils                                                                                   |
+|----------------------|------------------------------------------------------------------------------------------|
+| **Framework**        | [Next.js 14](https://nextjs.org/) (App Router) + React 19 + TypeScript                  |
+| **Base de données**  | PostgreSQL hébergé sur [Supabase](https://supabase.com/)                                 |
+| **ORM**              | [Prisma](https://www.prisma.io/) (v7)                                                    |
+| **Authentification** | Pseudo stocké dans `localStorage` + contexte React                                       |
+| **UI / Styles**      | [Tailwind CSS](https://tailwindcss.com/) + [shadcn/ui](https://ui.shadcn.com/) + [Framer Motion](https://www.framer.com/motion/) |
+| **Graphiques**       | [Recharts](https://recharts.org/)                                                        |
+| **Déploiement**      | [Vercel](https://vercel.com/)                                                            |
+| **Gestion d'état**   | [TanStack Query](https://tanstack.com/query)                                             |
+
+---
+
+## 📦 Installation locale
+
+### Prérequis
+
+- Node.js 18+ et npm (ou pnpm/yarn)
+- Compte Supabase (gratuit)
+
+### Étapes
+
+1. **Cloner le dépôt**
+
+```bash
+git clone https://github.com/ton-compte/fairshare.git
+cd fairshare
+```
+
+2. **Installer les dépendances**
+
+```bash
+npm install
+```
+
+3. **Configurer les variables d'environnement**
+
+Crée un fichier `.env` à la racine :
+
+```env
+DATABASE_URL="postgresql://postgres:[...]@aws-0-eu-central-1.pooler.supabase.co:6543/postgres?pgbouncer=true"
+DIRECT_URL="postgresql://postgres:[...]@aws-0-eu-central-1.pooler.supabase.co:5432/postgres"
+```
+
+> Récupère ces URLs depuis Supabase → **Project Settings** → **Database** → **Connection string** → **URI**.
+
+4. **Pousser le schéma Prisma vers la base de données**
+
+```bash
+npx prisma db push
+npx prisma generate
+```
+
+5. **Lancer le serveur de développement**
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+L'application sera accessible sur [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 📁 Structure du projet
 
-## Learn More
+```
+fairshare/
+├── app/                    # Routes Next.js (App Router)
+│   ├── api/                # Endpoints REST (users, groups, expenses, stats, balances)
+│   ├── layout.tsx
+│   ├── page.tsx            # Écran principal (routage par onglets)
+│   └── globals.css
+├── components/
+│   ├── fairshare/          # Composants métier (GroupList, Dashboard, Profile, etc.)
+│   └── ui/                 # Composants shadcn/ui
+├── contexts/
+│   └── user-context.tsx    # Gestion du pseudo utilisateur
+├── lib/
+│   ├── prisma.ts           # Client Prisma singleton
+│   └── debts.ts            # Algorithmes de calcul des dettes et minimisation
+├── prisma/
+│   └── schema.prisma       # Modèle de données
+├── public/                 # Assets statiques (logo, icônes)
+└── package.json
+```
+---
 
-To learn more about Next.js, take a look at the following resources:
+## 🧪 Scripts disponibles
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Commande               | Description                                         |
+|------------------------|-----------------------------------------------------|
+| `npm run dev`          | Lance le serveur de développement Next.js           |
+| `npm run build`        | Compile l'application pour la production            |
+| `npm run start`        | Démarre le serveur de production                    |
+| `npx prisma studio`    | Ouvre Prisma Studio pour visualiser les données     |
+| `npx prisma db push`   | Synchronise le schéma avec la base de données       |
+| `npx prisma generate`  | Génère le client Prisma                             |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## 🌐 Déploiement
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Le projet est optimisé pour un déploiement sur **Vercel** :
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Connecte ton dépôt GitHub à Vercel.
+2. Ajoute les variables d'environnement (`DATABASE_URL`, `DIRECT_URL`) dans les paramètres du projet.
+3. Vercel détecte automatiquement Next.js et déploie l'application.
+
+Assure-toi d'ajouter un script `postinstall` dans `package.json` pour générer le client Prisma à chaque build :
+
+```json
+"scripts": {
+  "postinstall": "prisma generate"
+}
+```
+
+---
+
+## 🤝 Contribuer
+
+Les contributions sont les bienvenues !  
+Pour signaler un bug ou proposer une amélioration, ouvre une issue ou une pull request.
+
+---
+
+## 📄 Licence
+
+Ce projet a été réalisé dans le cadre du concours **Hackverse 3.0**.  
+Code source libre de droits pour évaluation.
+
+---
+
+## 📧 Contact
+
+Équipe FairShare – [Voir le dépôt GitHub](https://github.com/Njome-David/Pre_Hackverse_NEWBIES)
