@@ -46,7 +46,7 @@ export function SettlementList({
             <Zap className="w-3.5 h-3.5 text-primary" strokeWidth={2.5} fill="currentColor" />
           </div>
           <h2 className="font-display font-semibold text-lg tracking-tight text-foreground">
-            Regle en {settlements.length} virements
+            Réglé en {settlements.length} virements
           </h2>
         </div>
         <span className="text-xs text-foreground/60 font-medium">
@@ -130,7 +130,7 @@ export function SettlementList({
                       <span>{s.to.name}</span>
                     </p>
                     <p className="text-xs text-foreground/65 mt-0.5">
-                      {s.emoji} {isSettled ? "Regle, bravo !" : "Virement suggere"}
+                      {s.emoji} {isSettled ? "Réglé, bravo !" : "Virement suggéré"}
                     </p>
                   </div>
 
@@ -141,7 +141,7 @@ export function SettlementList({
                         isSettled ? "text-muted-foreground line-through" : "text-foreground"
                       }`}
                     >
-                      {Math.round(s.amount).toLocaleString()}{currency}
+                      {Math.round(s.amount).toLocaleString()} {currency}
                     </p>
                   </div>
 
@@ -196,9 +196,9 @@ export function SettlementList({
             className="mt-4 p-4 rounded-2xl bg-primary/8 border border-primary/20 text-center shadow-sm"
           >
             <p className="text-2xl mb-1">🎉</p>
-            <p className="font-display font-semibold text-primary">Tout est regle !</p>
+            <p className="font-display font-semibold text-primary">Tout est réglé !</p>
             <p className="text-xs text-foreground/70 mt-1">
-              Le groupe est a zero. Prochain voyage ?
+              Le groupe est a zero. Prochaine activité ?
             </p>
           </motion.div>
         )}

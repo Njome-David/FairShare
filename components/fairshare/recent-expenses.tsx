@@ -95,14 +95,14 @@ export function RecentExpenses({ expenses, currency = "FCFA", groupId }: RecentE
                   </div>
                   <div className="text-right shrink-0">
                     <p className="font-display font-semibold text-[15px] tabular-nums text-foreground leading-tight">
-                      {Math.round(e.amount).toLocaleString()}{currency}
+                      {Math.round(e.amount).toLocaleString() } {currency}
                     </p>
                     <p
                       className={`text-[11px] font-semibold tabular-nums mt-0.5 ${
                         e.youArePayer ? "text-primary" : "text-destructive"
                       }`}
                     >
-                      {e.youArePayer ? "+" : "−"}{e.yourShare.toFixed(2)}{currency}
+                      {e.youArePayer ? "+" : "−"}{Math.round(e.yourShare).toLocaleString()} {currency}
                     </p>
                   </div>
                   <button

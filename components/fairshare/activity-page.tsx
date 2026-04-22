@@ -202,7 +202,7 @@ function MetricCard({
         <span className="text-xs text-muted-foreground">{label}</span>
       </div>
       <p className="text-2xl font-display font-bold text-foreground">
-        {displayValue}{unit}
+        {displayValue} {unit}
       </p>
     </motion.div>
   )

@@ -124,7 +124,10 @@ export function AddExpenseFab({ groupId, members }: AddExpenseFabProps) {
 
       {/* Bottom Sheet pour nouvelle dépense */}
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetContent side="bottom" className="h-auto max-h-[85vh] rounded-t-3xl px-5 pb-8 pt-6">
+        <SheetContent
+          side="bottom"
+          className="rounded-t-3xl px-5 pb-8 pt-6 max-h-[70vh] overflow-y-auto"
+        >
           <SheetHeader>
             <SheetTitle className="font-display text-2xl">Nouvelle dépense</SheetTitle>
           </SheetHeader>
@@ -152,7 +155,7 @@ export function AddExpenseFab({ groupId, members }: AddExpenseFabProps) {
                   const rounded = Math.round(raw / 25) * 25;
                   setAmount(rounded.toString());
                 }}
-                placeholder="0.00"
+                placeholder="0"
                 className="h-12"
                 required
               />
@@ -174,7 +177,7 @@ export function AddExpenseFab({ groupId, members }: AddExpenseFabProps) {
             </div>
             <div>
               <Label>Participants</Label>
-              <div className="space-y-2 mt-2 max-h-56 overflow-y-auto pr-1">
+              <div className="space-y-2 mt-2 max-h-48 overflow-y-auto pr-1">
                 {members.map((m) => (
                   <div key={m.id} className="flex items-center space-x-3 py-1">
                     <Checkbox

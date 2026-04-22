@@ -214,7 +214,7 @@ export function GroupsList({ onSelectGroup }: GroupsListProps) {
                     </span>
                     <span className="text-foreground/30">·</span>
                     <span className="text-xs text-foreground/50">
-                      Total: {group.totalSpent.toFixed(2)}€
+                      Total: {Math.round(group.totalSpent).toLocaleString()} FCFA
                     </span>
                   </div>
                 </div>
